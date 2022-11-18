@@ -39,8 +39,7 @@ func main() {
   gin.SetMode(gin.ReleaseMode)
   router := gin.New()
 
-  // apply i18n middleware
-  router.Use(ginI18n.Localize())
+  ginI18n.Localize()
 
   router.GET("/", func(context *gin.Context) {
     context.String(http.StatusOK, ginI18n.MustGetMessage("welcome"))
@@ -82,14 +81,14 @@ func main() {
   gin.SetMode(gin.ReleaseMode)
   router := gin.New()
 
-  // apply i18n middleware
-  router.Use(ginI18n.Localize(ginI18n.WithBundle(&ginI18n.BundleCfg{
+  // init
+  ginI18n.Localize(ginI18n.WithBundle(&ginI18n.BundleCfg{
     RootPath:         "./_example/localizeJSON",
     AcceptLanguage:   []language.Tag{language.German, language.English},
     DefaultLanguage:  language.English,
     UnmarshalFunc:    json.Unmarshal,
     FormatBundleFile: "json",
-  })))
+  }))
 
   router.GET("/", func(context *gin.Context) {
     context.String(http.StatusOK, ginI18n.MustGetMessage("welcome"))
@@ -129,8 +128,8 @@ func main() {
   gin.SetMode(gin.ReleaseMode)
   router := gin.New()
 
-  // apply i18n middleware
-  router.Use(ginI18n.Localize(
+  // init
+  ginI18n.Localize(
     ginI18n.WithGetLngHandle(
       func(context *gin.Context, defaultLng string) string {
         lng := context.Query("lng")
@@ -140,7 +139,7 @@ func main() {
         return lng
       },
     ),
-  ))
+  )
 
   router.GET("/", func(context *gin.Context) {
     context.String(http.StatusOK, ginI18n.MustGetMessage("welcome"))

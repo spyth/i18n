@@ -32,10 +32,3 @@ func WithBundle(config *BundleCfg) Option {
 		g.setBundle(config)
 	}
 }
-
-// WithGetLngHandle ...
-func WithGetLngHandle(handler GetLngHandler) Option {
-	return func(g GinI18n) {
-		g.setGetLngHandler(handler)
-	}
-}

@@ -14,19 +14,19 @@ import (
 // newServer ...
 func newServer() *gin.Engine {
 	router := gin.New()
-	router.Use(Localize())
+	localizer := Localize()
 
 	router.GET("/", func(context *gin.Context) {
-		context.String(http.StatusOK, MustGetMessage("welcome"))
+		context.String(http.StatusOK, localizer.MustGetMessage("welcome", context.GetHeader("Accept-Language")))
 	})
 
 	router.GET("/:name", func(context *gin.Context) {
-		context.String(http.StatusOK, MustGetMessage(&i18n.LocalizeConfig{
+		context.String(http.StatusOK, localizer.MustGetMessage(&i18n.LocalizeConfig{
 			MessageID: "welcomeWithName",
 			TemplateData: map[string]string{
 				"name": context.Param("name"),
 			},
-		}))
+		}, context.GetHeader("Accept-Language")))
 	})
 
 	return router

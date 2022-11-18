@@ -20,21 +20,30 @@ type server struct {
 	*gin.Engine
 }
 
-func newEmbedServer(middleware ...gin.HandlerFunc) *server {
+func newEmbedServer() *server {
 	server := &server{gin.New()}
-	server.Use(middleware...)
+	localizer := Localize(WithBundle(&BundleCfg{
+		DefaultLanguage:  language.English,
+		FormatBundleFile: "json",
+		AcceptLanguage:   []language.Tag{language.English, language.German, language.Chinese},
+		RootPath:         "./_example/localizeJSON/",
+		UnmarshalFunc:    json.Unmarshal,
+		// After commenting this line, use defaultLoader
+		// it will be loaded from the file
+		Loader: &EmbedLoader{fs},
+	}))
 
 	server.GET("/", func(context *gin.Context) {
-		context.String(http.StatusOK, MustGetMessage("welcome"))
+		context.String(http.StatusOK, localizer.MustGetMessage("welcome", context.GetHeader("Accept-Language")))
 	})
 
 	server.GET("/:name", func(context *gin.Context) {
-		context.String(http.StatusOK, MustGetMessage(&i18n.LocalizeConfig{
+		context.String(http.StatusOK, localizer.MustGetMessage(&i18n.LocalizeConfig{
 			MessageID: "welcomeWithName",
 			TemplateData: map[string]string{
 				"name": context.Param("name"),
 			},
-		}))
+		}, context.GetHeader("Accept-Language")))
 	})
 
 	return server
@@ -56,16 +65,7 @@ var (
 	//go:embed _example/localizeJSON/*
 	fs embed.FS
 
-	s = newEmbedServer(Localize(WithBundle(&BundleCfg{
-		DefaultLanguage:  language.English,
-		FormatBundleFile: "json",
-		AcceptLanguage:   []language.Tag{language.English, language.German, language.Chinese},
-		RootPath:         "./_example/localizeJSON/",
-		UnmarshalFunc:    json.Unmarshal,
-		// After commenting this line, use defaultLoader
-		// it will be loaded from the file
-		Loader: &EmbedLoader{fs},
-	})))
+	s = newEmbedServer()
 )
 
 func TestEmbedLoader(t *testing.T) {
